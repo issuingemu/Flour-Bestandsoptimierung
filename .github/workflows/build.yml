@@ -52,7 +52,7 @@ jobs:
           pip install pandas reportlab python-appimage
 
       - name: Build Linux AppImage
-        run: python-appimage build app flour_bestandsoptimierung.py --pip-packages "pandas reportlab"
+        run: python-appimage build app flour_bestandsoptimierung.py
 
       - name: Upload Linux Artifact
         uses: actions/upload-artifact@v4
