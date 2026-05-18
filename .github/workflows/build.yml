@@ -26,7 +26,7 @@ jobs:
           pip install pandas reportlab pyinstaller
 
       - name: Build Windows Executable
-        run: pyinstaller --onefile --windowed --name="Bestands_Tool" flour_bestandsoptimierung_v2.1.2.py
+        run: pyinstaller --onefile --windowed --name="Bestands_Tool" flour_bestandsoptimierung.py
 
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
@@ -52,7 +52,7 @@ jobs:
           pip install pandas reportlab python-appimage
 
       - name: Build Linux AppImage
-        run: python-appimage build script flour_bestandsoptimierung_v2.1.2.py --pip-packages "pandas reportlab"
+        run: python-appimage build script flour_bestandsoptimierung.py --pip-packages "pandas reportlab"
 
       - name: Upload Linux Artifact
         uses: actions/upload-artifact@v4
