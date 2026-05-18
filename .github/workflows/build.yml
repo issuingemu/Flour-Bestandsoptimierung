@@ -3,10 +3,12 @@ name: Build Executables
 on:
   push:
     branches: [ "main" ]
+    tags:
+     - 'v*'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-windows:
@@ -60,3 +62,32 @@ jobs:
           name: Bestands_Tool-Linux
           path: "*.AppImage"
           if-no-files-found: error
+
+  release:
+    name: Create GitHub Release
+    needs: [build-windows, build-linux]
+    runs-on: ubuntu-22.04
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download Windows Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Bestands_Tool-Windows
+          path: release_files
+
+      - name: Download Linux Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Bestands_Tool-Linux
+          path: release_files
+
+      - name: Generate Checksums
+        run: |
+          cd release_files
+          sha256sum * > checksums_sha256.txt
+
+      - name: Publish Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release_files/*
+          generate_release_notes: true
