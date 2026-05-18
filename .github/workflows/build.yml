@@ -1,0 +1,62 @@
+name: Build Executables
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas reportlab pyinstaller
+
+      - name: Build Windows Executable
+        run: pyinstaller --onefile --windowed --name="Bestands_Tool" flour_bestandsoptimierung_v2.1.2.py
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Bestands_Tool-Windows
+          path: dist/Bestands_Tool.exe
+          if-no-files-found: error
+
+  build-linux:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas reportlab python-appimage
+
+      - name: Build Linux AppImage
+        run: python-appimage build script flour_bestandsoptimierung_v2.1.2.py --pip-packages "pandas reportlab"
+
+      - name: Upload Linux Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Bestands_Tool-Linux
+          path: "*.AppImage"
+          if-no-files-found: error
