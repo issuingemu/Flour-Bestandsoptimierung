@@ -105,3 +105,119 @@ Für einen Lagerbewegungsvorschlag klickst du auf den Reiter "**Lagerbewegung**"
 Klicke jetzt auf "**Lagerbewegung berechnen**", um einen Vorschlag zur Umverteilung der erkannten Überbestände zu erhalten. Die Datei wird im selben Ordner abgelegt, in dem sich auch das Tool befindet.  
 Der fertige Vorschlag sieht so aus:
 ![Lagerbewegung Beispiel](assets/lagerbewegung.png)
+
+
+
+
+
+# 📦 Flour Bestandsoptimierung
+
+Ein plattformunabhängiges Python-Tool mit grafischer Oberfläche zur automatisierten Bestandsanalyse, Bedarfsberechnung und interaktiven PDF-Generierung für Filialbetriebe mit dem Kassensystem **Flour**.
+
+Das Tool unterstützt aktiv dabei, die Lagerhaltung zu optimieren und unnötige Kapitalbindung durch Überbestellungen zu vermeiden. Bestell- und Umverteilungsprozesse zwischen mehreren Filialen werden hiermit weitgehend automatisiert.
+
+---
+
+## ✨ Funktionen
+
+* **Intelligente Bedarfsanalyse:** Berechnet den realen Bedarf basierend auf historischen Verkäufen unter Berücksichtigung von Mindestbeständen und optionalen Zukunftspuffern.
+* **Proportionale Lagerumverteilung:** Auf Grundlage der historischen Verkaufsstatistik aller Filialen werden Überbestände einer Filiale über das *Hare-Niemeyer-Verfahren* mathematisch fair und proportional auf die Standorte mit ungedecktem Bedarf verteilt.
+* **Interaktiver PDF-Export:** Bestell- und Umbuchungsvorschläge werden als digital ausfüllbare PDF-Dateien mit integrierten Checkboxen erstellt, um den Bearbeitungsfortschritt vor Ort im Auge zu behalten.
+* **Optimierte Checklisten:** Bestellvorschläge werden übersichtlich nach Lieferanten segmentiert. Innerhalb dieser Abschnitte werden die Artikel sauber nach Hersteller und anschließend alphabetisch gelistet.
+* **Privacy-by-Design (Lokaler Datenschutz):** Alle Berechnungen und Datenverarbeitungen laufen zu 100 % offline auf dem lokalen System. Es werden keinerlei Daten an externe APIs oder Cloud-Dienste übertragen.
+
+---
+
+## 📖 Anleitung
+
+### 🛠️ Installation & Start
+
+Die aktuellsten Versionen für Windows und Linux findest du direkt auf der rechten Seite unter **[Releases](https://github.com/issuingemu/Flour-Bestandsoptimierung/releases)**.
+
+#### Windows
+1. Lade die Datei `Bestands_Tool.exe` herunter und lege sie in einem eigenen Ordner ab.
+2. Starte das Programm per Doppelklick.
+3. *Hinweis zu Microsoft SmartScreen:* Da das Programm im Workflow automatisiert gebaut und nicht kostenpflichtig zertifiziert ist, zeigt Windows beim ersten Start eventuell einen Warnbildschirm. Klicke einfach auf **„Weitere Informationen“** und anschließend auf **„Trotzdem ausführen“**.
+
+#### Linux
+1. Lade die Datei `Bestands_Tool-Linux` herunter und speichere sie in einem eigenen Ordner.
+2. Mache die Datei einmalig ausführbar:
+   * **Über die GUI:** Rechtsklick auf die Datei ➔ *Eigenschaften* ➔ *Zugriffsrechte* ➔ Haken bei *„Datei als Programm ausführen erlauben“* aktivieren.
+   * **Über das Terminal:** Öffne das Terminal im entsprechenden Ordner und führe folgenden Befehl aus:
+     ```bash
+     chmod +x Bestands_Tool-Linux
+     ```
+3. **Starten (Ubuntu 24.04+ / GNOME):** Mache einen Rechtsklick auf die Datei und wähle **„Als Programm ausführen“** (ein reiner Doppelklick wird von moderneren Linux-Systemen standardmäßig blockiert).
+
+---
+
+### 📊 Anwendung
+
+#### 1. Quelldateien aus Flour exportieren
+Klicke in deiner Flour-Oberfläche auf das Zahnrad-Symbol und wähle den Punkt **„Export“**.
+
+![Bild 1](assets/anleitung_1.png)
+
+##### Artikelstammdaten exportieren
+1. Klicke auf das Drop-down-Menü und wähle **„Artikel“**.
+
+![Anleitung 2](assets/anleitung_2.png)
+
+2. Aktiviere unbedingt die Option **„Inklusive kalkulierte Bestände“**.
+3. Klicke anschließend auf **„Export ausführen“**.
+
+![Anleitung 3](assets/anleitung_3.png)
+
+Sobald die Datei generiert wurde, kannst du sie im linken Menü oder direkt über den Button unterhalb von „Export ausführen“ herunterladen.
+
+![Anleitung 3.1](assets/anleitung_3.1.png)
+
+##### Verkaufsdaten exportieren
+Wechsle erneut in den Export-Bereich und wähle im Drop-down-Menü den Punkt **„Verkaufsübersicht Artikel“**.
+
+![Anleitung 4](assets/anleitung_4.png)
+
+* **Artikelfilter (Optional):** Hier findest du Optionen, um nach bestimmten Warengruppen zu filtern. Es können beispielsweise *Artikel-Tags* angegeben werden, um nur gezielte Sortimente auszugeben.  
+  ⚠️ **ACHTUNG:** Wenn du mehrere Tags angibst, landen am Ende nur Artikel in der Datei, die **alle angegebenen Tags gleichzeitig** besitzen.
+* **Zeitraum & Bedarfsrechnung („Datum von“):** Das Tool nutzt das hier gewählte Startdatum zur Berechnung deines Verkaufszeitraums. Die verkaufte Menge aus genau dieser Spanne bestimmt den zukünftigen Basisbedarf.
+  * *Beispiel:* Setzt du das Feld **„Datum von“** auf exakt eine Woche in die Vergangenheit und Artikel A wurde in dieser Woche 8-mal verkauft, definiert das Programm den Grundbedarf für diesen Artikel auf 8 Stück.
+
+Wenn deine Artikelfilter gesetzt und der Zeitraum bestimmt ist, klicke auf **„Export ausführen“**, warte die Verarbeitung ab und lade die Datei herunter.
+
+![Anleitung 4.1](assets/anleitung_4.1.png)
+
+#### 2. Ausführung des Tools
+Das Tool durchsucht beim Start automatisch das Verzeichnis, in dem es liegt, nach den zwei aktuellsten CSV-Dateien, die `articles` und `articlessold` im Namen tragen. Benenne die heruntergeladenen Dateien daher **nicht** um, sondern lege sie einfach direkt im selben Ordner ab, in dem sich das Programm befindet.
+
+![Anleitung 5](assets/anleitung_5.png)
+
+Nach dem Start des Tools bestätigen dir zwei grüne Zeilen am oberen Rand, dass die benötigten Dateien erfolgreich erkannt wurden. Darunter stehen dir zwei Reiter (Tabs) zur Verfügung.
+
+![Anleitung 6](assets/anleitung_6.png)
+
+##### Registerkarte: Bestellvorschlag
+Für einen Bestellvorschlag bleibst du im vorausgewählten Reiter und nimmst folgende Einstellungen vor:
+* Wähle im **Drop-Down-Menü** das gewünschte Lager aus. Für eine gemeinsame Bestellung über alle Filialen hinweg wählst du **„Zentrale Bestellung“**.
+* Bestimme über den **Slider** einen gewünschten **Mindestbestand**.
+* Setze bei Bedarf einen Haken beim **„Zukunftspuffer“**, um den errechneten **Grundbedarf pauschal um 20 % zu erhöhen**. Dies hilft, Lieferengpässe oder unerwartete Mehrverkäufe abzufedern.
+
+![Anleitung 7](assets/anleitung_7.png)
+
+Wenn alle Optionen eingestellt sind, klicke auf **„Bestellungen berechnen“**. Der fertige Bestellvorschlag wird als interaktive PDF-Datei im Programmordner abgelegt.
+
+Der fertige Bestellvorschlag sieht wie folgt aus:
+![Bestellvorschlag Beispiel](assets/bestellung.png)
+
+##### Registerkarte: Lagerbewegung
+Um Totbeständen und unnötiger Kapitalbindung entgegenzuwirken, ist es sinnvoll, Warenbestände gezielt zwischen den Filialen umzuverteilen. Wenn eine Produktkategorie in Filiale A stagniert, in Filiale B jedoch stark nachgefragt wird, berechnet das Tool eine mathematisch optimale Umlagerung.
+
+⚠️ **WICHTIG:** Beim Export der Verkaufsübersicht in Flour darf hierfür **kein Filter bei „Kasse“ gesetzt werden**. Die Verkaufsdaten **aller** Filialen sind zwingend erforderlich, um die Verteilung korrekt zu berechnen.
+
+Klicke im Tool auf den Reiter **„Lagerbewegung“** und triff deine Auswahl:
+* Wähle im **Drop-Down-Menü** das abgebende Lager aus, aus dem die Überbestände entnommen und verschickt werden sollen.
+* Bestimme mit dem **Slider** den **Mindestbestand**, der zwingend im Versandlager verbleiben muss.
+* Setze bei Bedarf einen Haken beim **„Zukunftspuffer“**, falls du erwartest, dass die Verkäufe im Versandlager zeitnah wieder steigen. Die Filiale behält dann 20 % mehr Artikel, als sie im dokumentierten Zeitraum rechnerisch benötigt hätte.
+
+![Anleitung 8](assets/anleitung_8.png)
+
+Klicke auf **„Lagerbewegung berechnen“**, um den Umverteilungsvorschlag zu generieren. Die PDF-Datei wird 
