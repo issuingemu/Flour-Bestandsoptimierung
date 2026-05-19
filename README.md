@@ -80,7 +80,7 @@ Für einen Bestellvorschlag bleibst du in dem vorausgewählten Reiter. Du musst 
 Wenn du für alle Optionen eine Auswahl getroffen hast, klicke auf "**Bestellungen berechnen**", um den Bestellvorschlag zu generieren. Er wird als PDF-Datei automatisch in dem Ordner abgelegt, in dem sich auch das Tool befindet.
 
 ![Anleitung 7](assets/anleitung_7)
-![Bestellvorschlag Beispiel](assets/bestellung.pdf)
+![Bestellvorschlag Beispiel](assets/bestellung.png)
 
 
 
