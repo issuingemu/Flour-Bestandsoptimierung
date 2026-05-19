@@ -77,7 +77,8 @@ Für einen Bestellvorschlag bleibst du in dem vorausgewählten Reiter. Du musst 
 - Wähle im **Drop-Down Menü** das Lager, für das ein Bestellvorschlag erstellt werden soll. Für einen Vorschlag für alle Lager gemeinsam, wähle "**Zentrale Bestellung**".
 - Bestimme mit dem **Slider** einen **Mindestbestand**.
 - Setze bei Bedarf einen **Haken** bei der Option "**Zukunftspuffer**", um den errechneten **Grundbedarf** um **20% zu erhöhen**, um Nullbestände durch Mehrverkäufe zu vermeiden.
-Wenn du für alle Optionen eine Auswahl getroffen hast, klicke auf "**Bestellungen berechnen**", um den Bestellvorschlag zu generieren. Er wird als PDF-Datei automatisch in dem Ordner abgelegt, in dem sich auch das Tool befindet.
+
+Wenn du für alle Optionen eine Auswahl getroffen hast, klicke auf "**Bestellungen berechnen**", um den Bestellvorschlag zu generieren. Er wird als bearbeitbare PDF-Datei automatisch in dem Ordner abgelegt, in dem sich auch das Tool befindet.
 
 ![Anleitung 7](assets/anleitung_7)
 ![Bestellvorschlag Beispiel](assets/bestellung.png)
