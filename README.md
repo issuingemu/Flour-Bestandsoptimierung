@@ -91,9 +91,8 @@ Für einen Bestellvorschlag bleibst du im vorausgewählten Reiter und nimmst fol
 
 ![Anleitung 7](assets/anleitung_7.png)
 
-Wenn alle Optionen eingestellt sind, klicke auf **„Bestellungen berechnen“**. Der fertige Bestellvorschlag wird als interaktive PDF-Datei im Programmordner abgelegt.
+Wenn alle Optionen eingestellt sind, klicke auf **„Bestellungen berechnen“**. Der fertige Bestellvorschlag wird als interaktive PDF-Datei im Programmordner abgelegt. Der fertige Bestellvorschlag sieht wie folgt aus:
 
-Der fertige Bestellvorschlag sieht wie folgt aus:
 ![Bestellvorschlag Beispiel](assets/bestellung.png)
 
 ##### Registerkarte: Lagerbewegung
@@ -108,9 +107,8 @@ Klicke im Tool auf den Reiter **„Lagerbewegung“** und triff deine Auswahl:
 
 ![Anleitung 8](assets/anleitung_8.png)
 
-Klicke auf **„Lagerbewegung berechnen“**, um den Umverteilungsvorschlag zu generieren. Die PDF-Datei wird ebenfalls direkt im Programmordner abgespeichert.
+Klicke auf **„Lagerbewegung berechnen“**, um den Umverteilungsvorschlag zu generieren. Die PDF-Datei wird ebenfalls direkt im Programmordner abgespeichert. Der fertige Vorschlag sieht wie folgt aus:
 
-Der fertige Vorschlag sieht wie folgt aus:
 ![Lagerbewegung Beispiel](assets/lagerbewegung.png)
 
 ---
