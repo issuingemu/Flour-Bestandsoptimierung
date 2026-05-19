@@ -69,7 +69,19 @@ Das Tool durchsucht beim Start automatisch den Ordner in dem es liegt nach den z
 
 ![Anleitung 5](assets/anleitung_5.png)
 
-Wenn du das Tool startest, solltest du ganz oben zwei grüne Zeilen sehen, die bestätigen, dass die Dateien gefunden wurden.
+Wenn du das Tool startest, solltest du ganz oben zwei grüne Zeilen sehen, die bestätigen, dass die Dateien gefunden wurden. Darunter liegen die zwei Tabs, aus denen du wählst, ob du eine Liste für Bestellungen generieren willst, oder eine für die Verteilung von Überbeständen aus einer Filiale an die anderen.
 
 ![Anleitung 6](assets/anleitung_6.png)
 
+Für einen Bestellvorschlag bleibst du in dem vorausgewählten Reiter. Du musst die folgenden Einstellungen vornehmen:
+- Wähle im **Drop-Down Menü** das Lager, für das ein Bestellvorschlag erstellt werden soll. Für einen Vorschlag für alle Lager gemeinsam, wähle "**Zentrale Bestellung**".
+- Bestimme mit dem **Slider** einen **Mindestbestand**.
+- Setze bei Bedarf einen **Haken** bei der Option "**Zukunftspuffer**", um den errechneten **Grundbedarf** um **20% zu erhöhen**, um Nullbestände durch Mehrverkäufe zu vermeiden.
+Wenn du für alle Optionen eine Auswahl getroffen hast, klicke auf "**Bestellungen berechnen**", um den Bestellvorschlag zu generieren. Er wird als PDF-Datei automatisch in dem Ordner abgelegt, in dem sich auch das Tool befindet.
+
+![Anleitung 7](assets/anleitung_7)
+![Bestellvorschlag Beispiel](assets/bestellung.pdf)
+
+
+
+Manchmal kann es sinnvoll sein, den Warenbestand zwischen den Filialen aufzuteilen, um Kapitalbindung entgegenzuwirken. Wenn sich eine Produktkategorie in Filiale A selten verkauft wird, während Filiale B mit den selben Artikeln hohe Verkaufszahlen erwirtschaftet, ist eine Umbuchung von Lager A nach Lager B die logische Konsequenz. 
