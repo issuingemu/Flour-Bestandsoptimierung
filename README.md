@@ -69,20 +69,39 @@ Das Tool durchsucht beim Start automatisch den Ordner in dem es liegt nach den z
 
 ![Anleitung 5](assets/anleitung_5.png)
 
-Wenn du das Tool startest, solltest du ganz oben zwei grüne Zeilen sehen, die bestätigen, dass die Dateien gefunden wurden. Darunter liegen die zwei Tabs, aus denen du wählst, ob du eine Liste für Bestellungen generieren willst, oder eine für die Verteilung von Überbeständen aus einer Filiale an die anderen.
+Wenn du das Tool startest, solltest du ganz oben zwei grüne Zeilen sehen, die bestätigen, dass die Dateien gefunden wurden. Darunter liegen die zwei Tabs, aus denen du wählst, ob du eine Liste für Bestellungen generieren willst, oder Überbestände aus einem Lager an die restlichen verteilen möchtest.
 
 ![Anleitung 6](assets/anleitung_6.png)
+
+##### Bestellvorschlag
 
 Für einen Bestellvorschlag bleibst du in dem vorausgewählten Reiter. Du musst die folgenden Einstellungen vornehmen:
 - Wähle im **Drop-Down Menü** das Lager, für das ein Bestellvorschlag erstellt werden soll. Für einen Vorschlag für alle Lager gemeinsam, wähle "**Zentrale Bestellung**".
 - Bestimme mit dem **Slider** einen **Mindestbestand**.
 - Setze bei Bedarf einen **Haken** bei der Option "**Zukunftspuffer**", um den errechneten **Grundbedarf** um **20% zu erhöhen**, um Nullbestände durch Mehrverkäufe zu vermeiden.
 
+![Anleitung 7](assets/anleitung_7.png)
+
 Wenn du für alle Optionen eine Auswahl getroffen hast, klicke auf "**Bestellungen berechnen**", um den Bestellvorschlag zu generieren. Er wird als bearbeitbare PDF-Datei automatisch in dem Ordner abgelegt, in dem sich auch das Tool befindet.
 
-![Anleitung 7](assets/anleitung_7)
+Der fertige Bestellvorschlag sieht dann so aus:
 ![Bestellvorschlag Beispiel](assets/bestellung.png)
 
 
+##### Lagerbewegung
 
-Manchmal kann es sinnvoll sein, den Warenbestand zwischen den Filialen aufzuteilen, um Kapitalbindung entgegenzuwirken. Wenn sich eine Produktkategorie in Filiale A selten verkauft wird, während Filiale B mit den selben Artikeln hohe Verkaufszahlen erwirtschaftet, ist eine Umbuchung von Lager A nach Lager B die logische Konsequenz. 
+Manchmal kann es sinnvoll sein, den Warenbestand zwischen den Filialen aufzuteilen, um Kapitalbindung entgegenzuwirken. Wenn eine Produktkategorie in Filiale A selten verkauft wird, während Filiale B mit den selben Artikeln hohe Verkaufszahlen erwirtschaftet, sollten Überbestände aus Lager A an Lager B geschickt werden.  
+Das Tool kann dabei helfen, Artikel zu identifizieren, bei denen ein Überbestand vorliegt und diese logisch an die anderen Lager zu verteilen. Für diese Rechnung werden Daten aus den selben Dateien genutzt, die für einen Bestellvorschlag exportiert werden.
+
+**WICHTIG:** Beim Exportieren der Verkaufsübersicht **keinen Filter bei "Kasse" setzen!** Die Verkaufsdaten **aller Filialen** sind **essenziell**, um eine Optimale Verteilung der Artikel berechnen zu können.
+
+Für einen Lagerbewegungsvorschlag klickst du auf den Reiter "**Lagerbewegung**". Hier wählst du aus den folgenden Optionen:
+- Wähle im **Drop-Down Menü** das Lager, aus dem Überbestände gefunden werden sollen und das die Artikel später verschickt.
+- Bestimme mit dem **Slider** einen **Mindestbestand**, der auf jeden Fall im Versandlager bleiben soll.
+- Setze bei Bedarf einen **Haken** bei der Option "**Zukunftspuffer**", wenn du davon ausgehst, dass die Verkäufe im Versandlager in der nächsten Zeit wieder steigen. Damit behält die Filiale 20% mehr Artikel, als sie über den Zeitraum verkauft hat, den die exportierte Verkaufsübersicht dokumentiert.
+
+![Anleitung 8](assets/anleitung_8.png)
+
+Klicke jetzt auf "**Lagerbewegung berechnen**", um einen Vorschlag zur Umverteilung der erkannten Überbestände zu erhalten. Die Datei wird im selben Ordner abgelegt, in dem sich auch das Tool befindet.  
+Der fertige Vorschlag sieht so aus:
+![Lagerbewegung Beispiel](assets/lagerbewegung.png)
