@@ -79,7 +79,7 @@ Das Tool durchsucht beim Start automatisch das Verzeichnis, in dem es liegt, nac
 
 ![Anleitung 5](assets/anleitung_5.png)
 
-Nach dem Start des Tools bestätigen dir zwei grüne Zeilen am oberen Rand, dass die benötigten Dateien erfolgreich erkannt wurden. Darunter stehen dir zwei Reiter (Tabs) zur Verfügung.
+Nach dem Start des Tools bestätigen dir zwei grüne Zeilen am oberen Rand, dass die benötigten Dateien erfolgreich erkannt wurden. Darunter stehen dir zwei Tabs zur Verfügung.
 
 ![Anleitung 6](assets/anleitung_6.png)
 
