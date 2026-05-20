@@ -100,7 +100,7 @@ Um Totbeständen und unnötiger Kapitalbindung entgegenzuwirken, ist es sinnvoll
 
 ⚠️ **WICHTIG:** Beim Export der Verkaufsübersicht in Flour darf hierfür **kein Filter bei „Kasse“ gesetzt werden**. Die Verkaufsdaten **aller** Filialen sind zwingend erforderlich, um die Verteilung korrekt zu berechnen.
 
-Klicke im Tool auf den Reiter **„Lagerbewegung“** und triff deine Auswahl:
+Klicke im GUI auf den Reiter **„Lagerbewegung“** und triff deine Auswahl:
 * Wähle im **Drop-Down-Menü** das abgebende Lager aus, aus dem die Überbestände entnommen und verschickt werden sollen.
 * Bestimme mit dem **Slider** den **Mindestbestand**, der zwingend im Versandlager verbleiben muss.
 * Setze bei Bedarf einen Haken beim **„Zukunftspuffer“**, falls du erwartest, dass die Verkäufe im Versandlager zeitnah wieder steigen. Die Filiale behält dann 20 % mehr Artikel, als sie im dokumentierten Zeitraum rechnerisch benötigt hätte.
