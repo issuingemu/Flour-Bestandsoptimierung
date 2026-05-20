@@ -35,7 +35,7 @@ Die aktuellsten Versionen für Windows und Linux findest du direkt auf der recht
      ```bash
      chmod +x Bestands_Tool-Linux
      ```
-3. **Starten (Ubuntu 24.04+ / GNOME):** Mache einen Rechtsklick auf die Datei und wähle **„Als Programm ausführen“** (ein reiner Doppelklick wird von moderneren Linux-Systemen standardmäßig blockiert).
+3. **Starten:** Unter Umständen blockiert Linux das Starten des Tools über einen reinen Doppelklick. Mache einen Rechtsklick auf die Datei und wähle **„Als Programm ausführen“**.
 
 ---
 
