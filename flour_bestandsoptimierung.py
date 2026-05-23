@@ -1,36 +1,16 @@
 #!/usr/bin/env python3
 import os
-import sys
 import glob
 import math
-import subprocess
 import tkinter as tk
 from tkinter import ttk, messagebox
-
-def ensure_dependencies():
-    try:
-        import pandas
-        import reportlab
-    except ImportError:
-        if sys.platform.startswith('win'):
-            subprocess.run([sys.executable, "-m", "pip", "install", "pandas", "reportlab"], 
-                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-ensure_dependencies()
 
 import pandas as pd
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 
-# ==========================================
-# APP-PFAD (APPIMAGE SICHERHEIT)
-# ==========================================
-# Falls als AppImage gestartet, nutzen wir den Ordner, aus dem es aufgerufen wurde.
-if 'OWD' in os.environ:
-    BASE_DIR = os.environ['OWD']
-else:
-    BASE_DIR = os.getcwd()
+BASE_DIR = os.getcwd()
 
 def get_latest_file(pattern):
     search_path = os.path.join(BASE_DIR, pattern)
@@ -195,7 +175,10 @@ def run_transfers(source_shop, min_stock, apply_buffer, sales_file, art_file, sh
             dist = distribute_surplus(surplus, target_sales)
             
             if sum(dist.values()) > 0:
-                row_data = {'Name': str(row.get('Bezeichnung', ''))}
+                hersteller = str(row.get('Hersteller', '')).strip()
+                hersteller = hersteller if hersteller and hersteller != 'nan' else "Ohne Hersteller"
+                
+                row_data = {'Hersteller': hersteller, 'Name': str(row.get('Bezeichnung', ''))}
                 for ts in target_shops:
                     row_data[ts] = dist[ts]
                     if dist[ts] > 0: moved_counts[ts] += 1
@@ -203,29 +186,42 @@ def run_transfers(source_shop, min_stock, apply_buffer, sales_file, art_file, sh
 
     if not results: return True, "Keine Umbuchungen nötig."
 
+    df_out = pd.DataFrame(results).sort_values(by=['Hersteller', 'Name'])
     pdf_file = os.path.join(BASE_DIR, f"Lagerbewegung_{sanitize_filename(source_shop)}.pdf")
+    
     try:
         c = canvas.Canvas(pdf_file, pagesize=A4)
         width, height = A4
-        margin, y, form = 40, height - 80, c.acroForm
+        margin, form = 40, c.acroForm
+        y = height - 80
         
         c.setFont("Helvetica-Bold", 14)
         c.drawString(margin, height - 40, f"Lagerbewegung: Von {source_shop}")
 
-        c.setFont("Helvetica-Bold", 10)
-        c.drawString(margin, y, "Artikelname")
-        x_offset = margin + 250
-        for ts in target_shops:
-            c.drawString(x_offset, y, ts[:10])
-            x_offset += 60
-        c.drawString(x_offset, y, "Erledigt")
-        c.line(margin, y-5, width-margin, y-5)
-        y -= 20
+        current_hersteller = None
+        for idx, row in df_out.iterrows():
+            if y < 70: 
+                c.showPage()
+                y = height - 50
+            
+            if row['Hersteller'] != current_hersteller:
+                current_hersteller = row['Hersteller']
+                y -= 10
+                c.setFont("Helvetica-Bold", 11)
+                c.drawString(margin, y, f"Hersteller: {current_hersteller}")
+                y -= 20
+                c.setFont("Helvetica-Bold", 10)
+                c.drawString(margin, y, "Artikelname")
+                x_offset = margin + 250
+                for ts in target_shops:
+                    c.drawString(x_offset, y, ts[:10])
+                    x_offset += 60
+                c.drawString(x_offset, y, "Erledigt")
+                c.line(margin, y-5, width-margin, y-5)
+                y -= 20
 
-        for idx, row in enumerate(results):
-            if y < 50: c.showPage(); y = height - 50
             c.setFont("Helvetica", 9)
-            c.drawString(margin, y, row['Name'][:45])
+            c.drawString(margin, y, str(row['Name'])[:45])
             x_offset = margin + 250
             for ts in target_shops:
                 if row[ts] > 0: c.drawString(x_offset + 10, y, str(row[ts]))
