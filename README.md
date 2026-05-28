@@ -6,6 +6,16 @@ Das Tool unterstützt aktiv dabei, die Lagerhaltung zu optimieren und unnötige 
 
 ---
 
+## ⚡️ Problemerkennung
+Im manuellen Betriebsalltag führten die herkömmlichen Bestell- und Umverteilungsprozesse zu zwei wesentlichen Herausforderungen:
+
+- **Hoher Zeitaufwand:** Die Abwicklung von Bestellungen basierte auf den grafischen Verkaufsstatistiken im Flour-User-Interface (UI). Jeder Artikel musste einzeln aufgerufen werden, um historische Verkäufe mit aktuellen Lagerbeständen abzugleichen. Die geschätzten Bestellmengen wurden anschließend manuell in einen Discord-Kanal übertragen. Noch zeitintensiver gestaltete sich die filialübergreifende Umverteilung von Überbeständen: Hierfür mussten zunächst die Statistiken des Versandlagers analysiert werden, um betroffene Artikel zu identifizieren, gefolgt von einer manuellen Bewertung aller anderen Filialen für eine logische Verteilung.
+- **Human Error:** Bei der wiederholten, manuellen Differenzberechnung zwischen Lagerbestand und -abgang im Kopf waren Rechenfehler unvermeidbar. Weitaus fehleranfälliger war jedoch die statistische Analyse: Falschinterpretationen der Daten, Fehleinschätzungen der zukünftigen Nachfrage oder unbewusste, subjektive Kaufentscheidungen führten regelmäßig zu Über- oder Unterbeständen.
+
+Beide Probleme lassen sich durch eine Automatisierung des Bestellprozesses effizient lösen. Die Entdeckung der CSV-Exportfunktion in Flour für Lagerbestände und Verkaufsdaten bildete die Basis für dieses Tool. Ein Python-Skript übernimmt nun die strukturierte, logische Analyse der Daten – logikbasiert, objektiv und in Sekunden.
+
+---
+
 ## ✨ Funktionen
 
 * **Intelligente Bedarfsanalyse:** Berechnet den realen Bedarf basierend auf historischen Verkäufen unter Berücksichtigung von Mindestbeständen und optionalen Zukunftspuffern.
