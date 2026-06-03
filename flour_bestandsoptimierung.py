@@ -47,6 +47,49 @@ def distribute_surplus(surplus, target_sales):
         distributed[sorted_rem[i]] += 1
     return distributed
 
+
+def calculate_smart_distribution(source_shop, shops, row, sales_pivot, min_stock, apply_buffer):
+    art_no = str(row.get('Artikel-Nr', '')).strip()
+    stocks = {}
+    sales = {}
+    for shop in shops:
+        stocks[shop] = int(float(row.get(f'Bestand: {shop}', 0))) if pd.notnull(row.get(f'Bestand: {shop}')) else 0
+        sales[shop] = int(sales_pivot.at[art_no, shop]) if not sales_pivot.empty and art_no in sales_pivot.index and shop in sales_pivot.columns else 0
+
+    need_source = calculate_need(sales.get(source_shop, 0), min_stock, apply_buffer)
+    surplus = max(0, stocks.get(source_shop, 0) - need_source)
+    target_shops = [shop for shop in shops if shop != source_shop]
+    assigned = {shop: 0 for shop in target_shops}
+
+    if surplus <= 0:
+        return assigned
+
+    deficits = {}
+    for ts in target_shops:
+        need_ts = calculate_need(sales.get(ts, 0), min_stock, apply_buffer)
+        deficits[ts] = max(0, need_ts - stocks.get(ts, 0))
+
+    total_deficit = sum(deficits.values())
+    if total_deficit > 0:
+        if surplus < total_deficit:
+            phase1 = distribute_surplus(surplus, deficits)
+            for ts, amount in phase1.items():
+                assigned[ts] += amount
+            return assigned
+
+        for ts, amount in deficits.items():
+            assigned[ts] += amount
+        surplus -= total_deficit
+
+    total_sales = {shop: sales.get(shop, 0) for shop in shops}
+    phase2_all = distribute_surplus(surplus, total_sales)
+    for shop, amount in phase2_all.items():
+        if shop in assigned:
+            assigned[shop] += amount
+
+    return assigned
+
+
 def load_and_prep_data(sales_file, art_file):
     try:
         sales_df = pd.read_csv(sales_file, sep=';', encoding='ISO-8859-1', decimal=',')
@@ -204,32 +247,30 @@ def build_transfer_data(source_shop, min_stock, apply_buffer, sales_file, art_fi
     results = []
     for _, row in art_df.iterrows():
         art_no = str(row.get('Artikel-Nr', '')).strip()
-        if not art_no or art_no == 'nan':
+        if not art_no or art_no == 'nan' or sales_pivot.empty or art_no not in sales_pivot.index:
             continue
 
-        stock_source = int(float(row.get(f'Bestand: {source_shop}', 0))) if pd.notnull(row.get(f'Bestand: {source_shop}')) else 0
-        sales_source = int(sales_pivot.at[art_no, source_shop]) if not sales_pivot.empty and art_no in sales_pivot.index and source_shop in sales_pivot.columns else 0
-        bedarf_source = calculate_need(sales_source, min_stock, apply_buffer)
-        surplus = stock_source - bedarf_source
-
-        if surplus <= 0:
+        if int(sales_pivot.loc[art_no].sum()) == 0:
             continue
 
-        target_sales = {
-            ts: (int(sales_pivot.at[art_no, ts]) if not sales_pivot.empty and art_no in sales_pivot.index and ts in sales_pivot.columns else 0)
-            for ts in target_shops
-        }
-        dist = distribute_surplus(surplus, target_sales)
-        if sum(dist.values()) <= 0:
+        amounts = calculate_smart_distribution(source_shop, shops, row, sales_pivot, min_stock, apply_buffer)
+        if sum(amounts.values()) <= 0:
             continue
 
         hersteller = str(row.get('Hersteller', '')).strip()
         hersteller = hersteller if hersteller and hersteller != 'nan' else 'Ohne Hersteller'
 
+        source_stock = int(float(row.get(f'Bestand: {source_shop}', 0))) if pd.notnull(row.get(f'Bestand: {source_shop}')) else 0
+        total_transfer = sum(amounts.values())
+        remaining = source_stock - total_transfer
+
         results.append({
             'hersteller': hersteller,
             'name': str(row.get('Bezeichnung', '')),
-            'amounts': {ts: dist[ts] for ts in target_shops}
+            'amounts': amounts,
+            'source_stock': source_stock,
+            'total_transfer': total_transfer,
+            'remaining': remaining
         })
 
     if not results:
@@ -279,11 +320,16 @@ def create_transfer_pdf(data, filename=None):
             y -= 20
             c.setFont('Helvetica-Bold', 10)
             c.drawString(margin, y, 'Artikelname')
-            x_offset = margin + 250
+            x_offset = margin + 210
             for ts in data.get('target_shops', []):
-                c.drawString(x_offset, y, ts[:10])
-                x_offset += 60
-            c.drawString(x_offset, y, 'Erledigt')
+                c.drawString(x_offset, y, ts[:8])
+                x_offset += 45
+            gesamt_x = x_offset
+            c.drawString(gesamt_x, y, 'Gesamt')
+            bleibt_x = gesamt_x + 45
+            c.drawString(bleibt_x, y, 'Bleibt')
+            checkbox_x = bleibt_x + 45
+            c.drawString(checkbox_x, y, 'Erl.')
             c.line(margin, y-5, width-margin, y-5)
             y -= 20
 
@@ -293,13 +339,18 @@ def create_transfer_pdf(data, filename=None):
                     y = height - 50
                 c.setFont('Helvetica', 9)
                 c.drawString(margin, y, item['name'][:45])
-                x_offset = margin + 250
+                x_offset = margin + 210
                 for ts in data.get('target_shops', []):
                     amount = item['amounts'].get(ts, 0)
                     if amount > 0:
-                        c.drawString(x_offset + 10, y, str(amount))
-                    x_offset += 60
-                c.acroForm.checkbox(name=f'done_{idx}', x=x_offset + 10, y=y-2, size=12)
+                        c.drawString(x_offset + 5, y, str(amount))
+                    x_offset += 45
+                c.drawString(gesamt_x + 5, y, str(item.get('total_transfer', 0)))
+                c.setStrokeColor(colors.grey)
+                c.line(bleibt_x - 3, y + 3, bleibt_x - 3, y - 12)
+                c.setStrokeColor(colors.black)
+                c.drawString(bleibt_x + 5, y, str(item.get('remaining', 0)))
+                c.acroForm.checkbox(name=f'done_{idx}', x=checkbox_x + 5, y=y-2, size=10)
                 c.setStrokeColor(colors.lightgrey)
                 c.line(margin, y-5, width-margin, y-5)
                 c.setStrokeColor(colors.black)
@@ -334,10 +385,10 @@ class SegmentEditor(tk.Toplevel):
         self.data = preview_window.data
         self.is_new = segment_index >= len(self.data['segments'])
         self.title('Segment bearbeiten' if not self.is_new else 'Neues Segment hinzufügen')
-        self.geometry('420x240')
-        self.resizable(False, False)
+        self.resizable(True, True)
         self.build_ui()
         self.load_segment()
+        self._calculate_window_size()
 
     def build_ui(self):
         frame = ttk.Frame(self, padding=15)
@@ -372,6 +423,25 @@ class SegmentEditor(tk.Toplevel):
             self.ent_supplier.insert(0, segment.get('lieferant', ''))
             self.ent_manufacturer.delete(0, tk.END)
             self.ent_manufacturer.insert(0, segment.get('hersteller', ''))
+
+    def _calculate_window_size(self):
+        """Berechnet die optimale Fenstergröße basierend auf dem Inhalt."""
+        self.update_idletasks()
+        
+        req_height = self.winfo_reqheight()
+        req_width = self.winfo_reqwidth()
+        
+        screen_height = self.winfo_screenheight()
+        screen_width = self.winfo_screenwidth()
+        
+        max_height = int(screen_height * 0.8)
+        window_width = max(420, req_width + 20)
+        window_height = min(req_height + 20, max_height)
+        
+        window_x = (screen_width - window_width) // 2
+        window_y = (screen_height - window_height) // 2
+        
+        self.geometry(f'{window_width}x{window_height}+{window_x}+{window_y}')
 
     def navigate(self, direction):
         new_index = self.segment_index + direction
@@ -418,10 +488,10 @@ class ArticleEditor(tk.Toplevel):
         self.data = preview_window.data
         self.is_new = article_index is None or article_index >= len(self.data['segments'][segment_index]['items'])
         self.title('Artikel bearbeiten' if not self.is_new else 'Neuen Artikel hinzufügen')
-        self.geometry('460x300')
-        self.resizable(False, False)
+        self.resizable(True, True)
         self.build_ui()
         self.load_article()
+        self._calculate_window_size()
 
     def build_ui(self):
         frame = ttk.Frame(self, padding=15)
@@ -470,6 +540,25 @@ class ArticleEditor(tk.Toplevel):
             self.ent_name.insert(0, article.get('name', ''))
             self.ent_amount.delete(0, tk.END)
             self.ent_amount.insert(0, str(article.get('amount', '')))
+
+    def _calculate_window_size(self):
+        """Berechnet die optimale Fenstergröße basierend auf dem Inhalt."""
+        self.update_idletasks()
+        
+        req_height = self.winfo_reqheight()
+        req_width = self.winfo_reqwidth()
+        
+        screen_height = self.winfo_screenheight()
+        screen_width = self.winfo_screenwidth()
+        
+        max_height = int(screen_height * 0.8)
+        window_width = max(460, req_width + 20)
+        window_height = min(req_height + 20, max_height)
+        
+        window_x = (screen_width - window_width) // 2
+        window_y = (screen_height - window_height) // 2
+        
+        self.geometry(f'{window_width}x{window_height}+{window_x}+{window_y}')
 
     def navigate(self, direction):
         segment = self.data['segments'][self.segment_index]
@@ -675,10 +764,10 @@ class TransferSegmentEditor(tk.Toplevel):
         self.data = preview_window.data
         self.is_new = segment_index >= len(self.data['segments'])
         self.title('Hersteller bearbeiten' if not self.is_new else 'Neues Hersteller-Segment hinzufügen')
-        self.geometry('380x180')
-        self.resizable(False, False)
+        self.resizable(True, True)
         self.build_ui()
         self.load_segment()
+        self._calculate_window_size()
 
     def build_ui(self):
         frame = ttk.Frame(self, padding=15)
@@ -705,6 +794,25 @@ class TransferSegmentEditor(tk.Toplevel):
             segment = self.data['segments'][self.segment_index]
             self.ent_hersteller.delete(0, tk.END)
             self.ent_hersteller.insert(0, segment.get('hersteller', ''))
+
+    def _calculate_window_size(self):
+        """Berechnet die optimale Fenstergröße basierend auf dem Inhalt."""
+        self.update_idletasks()
+        
+        req_height = self.winfo_reqheight()
+        req_width = self.winfo_reqwidth()
+        
+        screen_height = self.winfo_screenheight()
+        screen_width = self.winfo_screenwidth()
+        
+        max_height = int(screen_height * 0.8)
+        window_width = max(380, req_width + 20)
+        window_height = min(req_height + 20, max_height)
+        
+        window_x = (screen_width - window_width) // 2
+        window_y = (screen_height - window_height) // 2
+        
+        self.geometry(f'{window_width}x{window_height}+{window_x}+{window_y}')
 
     def navigate(self, direction):
         new_index = self.segment_index + direction
@@ -743,10 +851,10 @@ class TransferArticleEditor(tk.Toplevel):
         self.shop_entries = {}
         self.is_new = article_index is None or article_index >= len(self.data['segments'][segment_index]['items'])
         self.title('Artikel bearbeiten' if not self.is_new else 'Neuen Artikel hinzufügen')
-        self.geometry('520x380')
-        self.resizable(False, False)
+        self.resizable(True, True)
         self.build_ui()
         self.load_article()
+        self._calculate_window_size()
 
     def build_ui(self):
         frame = ttk.Frame(self, padding=15)
@@ -768,21 +876,28 @@ class TransferArticleEditor(tk.Toplevel):
             ttk.Label(qty_frame, text=f'{shop}:').grid(row=idx, column=0, sticky='w', pady=2)
             ent = ttk.Entry(qty_frame, width=15)
             ent.grid(row=idx, column=1, pady=2, padx=(5, 0), sticky='w')
+            ent.bind('<KeyRelease>', lambda e: self.update_total())
             self.shop_entries[shop] = ent
 
+        ttk.Separator(frame, orient='horizontal').grid(row=6 + len(self.shop_entries), column=0, columnspan=2, sticky='ew', pady=10)
+
+        ttk.Label(frame, text='Gesamt (wird automatisch berechnet):').grid(row=7 + len(self.shop_entries), column=0, sticky='w')
+        self.lbl_total = ttk.Label(frame, text='0', font=('TkDefaultFont', 10, 'bold'), foreground='blue')
+        self.lbl_total.grid(row=8 + len(self.shop_entries), column=0, sticky='w', pady=(0, 5))
+
         nav = ttk.Frame(frame)
-        nav.grid(row=6 + len(self.shop_entries), column=0, columnspan=2, pady=(10, 0), sticky='ew')
+        nav.grid(row=9 + len(self.shop_entries), column=0, columnspan=2, pady=(10, 0), sticky='ew')
         ttk.Button(nav, text='←', width=4, command=lambda: self.navigate(-1)).pack(side=tk.LEFT)
         ttk.Button(nav, text='→', width=4, command=lambda: self.navigate(1)).pack(side=tk.LEFT, padx=5)
         ttk.Button(nav, text='Zu Hersteller wechseln', command=self.open_segment).pack(side=tk.LEFT, padx=10)
 
         actions = ttk.Frame(frame)
-        actions.grid(row=7 + len(self.shop_entries), column=0, columnspan=2, pady=15, sticky='ew')
+        actions.grid(row=10 + len(self.shop_entries), column=0, columnspan=2, pady=15, sticky='ew')
         ttk.Button(actions, text='Speichern', command=self.save).pack(side=tk.LEFT, expand=True, fill=tk.X)
         ttk.Button(actions, text='Abbrechen', command=self.destroy).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=5)
 
         extra = ttk.Frame(frame)
-        extra.grid(row=8 + len(self.shop_entries), column=0, columnspan=2, pady=(5, 0), sticky='ew')
+        extra.grid(row=11 + len(self.shop_entries), column=0, columnspan=2, pady=(5, 0), sticky='ew')
         ttk.Button(extra, text='Artikel entfernen', command=self.remove).pack(side=tk.LEFT, expand=True, fill=tk.X)
         ttk.Button(extra, text='Artikel hinzufügen', command=self.add_new).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=5)
 
@@ -803,6 +918,36 @@ class TransferArticleEditor(tk.Toplevel):
             for shop, ent in self.shop_entries.items():
                 ent.delete(0, tk.END)
                 ent.insert(0, str(article.get('amounts', {}).get(shop, 0)))
+        self.update_total()
+
+    def _calculate_window_size(self):
+        """Berechnet die optimale Fenstergröße basierend auf dem Inhalt."""
+        self.update_idletasks()
+        
+        req_height = self.winfo_reqheight()
+        req_width = self.winfo_reqwidth()
+        
+        screen_height = self.winfo_screenheight()
+        screen_width = self.winfo_screenwidth()
+        
+        max_height = int(screen_height * 0.8)
+        window_width = max(520, req_width + 20)
+        window_height = min(req_height + 20, max_height)
+        
+        window_x = (screen_width - window_width) // 2
+        window_y = (screen_height - window_height) // 2
+        
+        self.geometry(f'{window_width}x{window_height}+{window_x}+{window_y}')
+
+
+    def update_total(self):
+        total = 0
+        for ent in self.shop_entries.values():
+            try:
+                total += max(0, int(ent.get().strip() or 0))
+            except ValueError:
+                pass
+        self.lbl_total.config(text=str(total))
 
     def navigate(self, direction):
         segment = self.data['segments'][self.segment_index]
@@ -834,7 +979,18 @@ class TransferArticleEditor(tk.Toplevel):
             except ValueError:
                 amounts[shop] = 0
 
-        article_data = {'hersteller': hersteller, 'name': name, 'amounts': amounts}
+        total_transfer = sum(amounts.values())
+        source_stock = self.data['segments'][self.segment_index]['items'][self.article_index].get('source_stock', 0) if not self.is_new and self.article_index < len(self.data['segments'][self.segment_index]['items']) else 0
+        remaining = source_stock - total_transfer
+
+        article_data = {
+            'hersteller': hersteller,
+            'name': name,
+            'amounts': amounts,
+            'source_stock': source_stock,
+            'total_transfer': total_transfer,
+            'remaining': remaining
+        }
         segment = self.data['segments'][self.segment_index]
 
         if self.is_new or self.article_index is None or self.article_index >= len(segment['items']):
@@ -856,7 +1012,14 @@ class TransferArticleEditor(tk.Toplevel):
 
     def add_new(self):
         segment = self.data['segments'][self.segment_index]
-        new_item = {'hersteller': segment.get('hersteller', '-'), 'name': '', 'amounts': {shop: 0 for shop in self.data.get('target_shops', [])}}
+        new_item = {
+            'hersteller': segment.get('hersteller', '-'),
+            'name': '',
+            'amounts': {shop: 0 for shop in self.data.get('target_shops', [])},
+            'source_stock': 0,
+            'total_transfer': 0,
+            'remaining': 0
+        }
         segment['items'].append(new_item)
         self.article_index = len(segment['items']) - 1
         self.is_new = False
@@ -916,6 +1079,9 @@ class TransferPreviewWindow(tk.Toplevel):
         header_font = ('Helvetica', max(8, int(9 * self.zoom)), 'bold')
 
         for seg_index, segment in enumerate(self.data.get('segments', [])):
+            if not segment.get('items'):
+                continue
+
             segment_frame = tk.Frame(self.canvas, bd=1, relief='solid', bg='#ffffff')
             title_text = f"Hersteller: {segment['hersteller']}"
             tk.Label(segment_frame, text=title_text, font=segment_font, bg='#dfefff', anchor='w').pack(fill=tk.X, padx=8, pady=8)
@@ -925,6 +1091,8 @@ class TransferPreviewWindow(tk.Toplevel):
             tk.Label(header, text='Artikelname', width=42, anchor='w', bg='#f0f4ff', font=header_font).pack(side=tk.LEFT)
             for shop in self.data.get('target_shops', []):
                 tk.Label(header, text=shop[:10], width=10, anchor='w', bg='#f0f4ff', font=header_font).pack(side=tk.LEFT)
+            tk.Label(header, text='Gesamt', width=10, anchor='w', bg='#f0f4ff', font=header_font).pack(side=tk.LEFT)
+            tk.Label(header, text='Bleibt', width=10, anchor='w', bg='#ffd9d9', font=header_font).pack(side=tk.LEFT)
 
             for art_index, item in enumerate(segment['items']):
                 row = tk.Frame(segment_frame, bg='#ffffff', pady=2)
@@ -938,6 +1106,12 @@ class TransferPreviewWindow(tk.Toplevel):
                     lbl_amt = tk.Label(row, text=str(item.get('amounts', {}).get(shop, 0)), width=10, anchor='w', bg='#ffffff', font=row_font)
                     lbl_amt.pack(side=tk.LEFT)
                     lbl_amt.bind('<Button-1>', lambda e, si=seg_index, ai=art_index: self.open_article_editor(si, ai))
+                lbl_gesamt = tk.Label(row, text=str(item.get('total_transfer', 0)), width=10, anchor='w', bg='#ffffff', font=row_font, foreground='#0d47a1')
+                lbl_gesamt.pack(side=tk.LEFT)
+                lbl_gesamt.bind('<Button-1>', lambda e, si=seg_index, ai=art_index: self.open_article_editor(si, ai))
+                lbl_bleibt = tk.Label(row, text=str(item.get('remaining', 0)), width=10, anchor='w', bg='#ffd9d9', font=row_font, foreground='#c41e1e')
+                lbl_bleibt.pack(side=tk.LEFT)
+                lbl_bleibt.bind('<Button-1>', lambda e, si=seg_index, ai=art_index: self.open_article_editor(si, ai))
                 for widget in (lbl_n,):
                     widget.bind('<Button-1>', lambda e, si=seg_index, ai=art_index: self.open_article_editor(si, ai))
 
@@ -952,6 +1126,7 @@ class TransferPreviewWindow(tk.Toplevel):
             segment_frame.bind('<Leave>', lambda e, w=segment_frame: w.config(bg='#ffffff'))
             segment_frame.bind('<Button-1>', lambda e, si=seg_index: self.open_segment_editor(si))
 
+            segment_frame.update_idletasks()
             self.canvas.create_window(x, y, anchor='nw', window=segment_frame, width=content_width)
             y += segment_frame.winfo_reqheight() + 16
 
