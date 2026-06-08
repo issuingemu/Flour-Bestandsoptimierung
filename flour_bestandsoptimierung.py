@@ -707,7 +707,10 @@ class PreviewWindow(tk.Toplevel):
             segment_frame.bind('<Leave>', lambda e, w=segment_frame: w.config(bg='#ffffff'))
             segment_frame.bind('<Button-1>', lambda e, si=seg_index: self.open_segment_editor(si))
 
+            # Ensure Tkinter has calculated widget sizes (process idle tasks)
+            segment_frame.update_idletasks()
             self.canvas.create_window(x, y, anchor='nw', window=segment_frame, width=content_width)
+            # Use the computed required height to position the next segment
             y += segment_frame.winfo_reqheight() + 16
 
         add_segment = tk.Frame(self.canvas, bd=2, relief='dashed', bg='#eef7ff')
@@ -715,6 +718,7 @@ class PreviewWindow(tk.Toplevel):
         add_label.pack(fill=tk.BOTH, padx=8, pady=16)
         add_segment.bind('<Button-1>', lambda e: self.open_segment_editor(len(self.data['segments'])))
         add_label.bind('<Button-1>', lambda e: self.open_segment_editor(len(self.data['segments'])))
+        add_segment.update_idletasks()
         self.canvas.create_window(x, y, anchor='nw', window=add_segment, width=content_width)
         y += add_segment.winfo_reqheight() + 20
 
@@ -1126,6 +1130,7 @@ class TransferPreviewWindow(tk.Toplevel):
             segment_frame.bind('<Leave>', lambda e, w=segment_frame: w.config(bg='#ffffff'))
             segment_frame.bind('<Button-1>', lambda e, si=seg_index: self.open_segment_editor(si))
 
+            # Ensure Tkinter has calculated widget sizes before measuring
             segment_frame.update_idletasks()
             self.canvas.create_window(x, y, anchor='nw', window=segment_frame, width=content_width)
             y += segment_frame.winfo_reqheight() + 16
@@ -1135,6 +1140,7 @@ class TransferPreviewWindow(tk.Toplevel):
         add_label.pack(fill=tk.BOTH, padx=8, pady=16)
         add_segment.bind('<Button-1>', lambda e: self.open_segment_editor(len(self.data['segments'])))
         add_label.bind('<Button-1>', lambda e: self.open_segment_editor(len(self.data['segments'])))
+        add_segment.update_idletasks()
         self.canvas.create_window(x, y, anchor='nw', window=add_segment, width=content_width)
         y += add_segment.winfo_reqheight() + 20
 
