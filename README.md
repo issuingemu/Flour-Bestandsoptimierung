@@ -101,7 +101,17 @@ Für einen Bestellvorschlag bleibst du im vorausgewählten Reiter und nimmst fol
 
 ![Anleitung 7](assets/anleitung_7.png)
 
-Wenn alle Optionen eingestellt sind, klicke auf **„Bestellungen berechnen“**. Der fertige Bestellvorschlag wird als interaktive PDF-Datei im Programmordner abgelegt. Der fertige Bestellvorschlag sieht wie folgt aus:
+Wenn alle Optionen eingestellt sind, klicke auf **„Bestellvorschau öffnen“**. Das Tool öffnet ein Fenster, in dem der errechnete Bedarf gelistet und manuell nachbearbeitbar ist.
+
+![Bestellvorschau](assets/anleitung_7.1.png)
+
+Per Klick auf einen der Artikel, kannst du diesen anpassen oder entfernen. Das ist vor allem dann hilfreich, wenn beispielsweise eine Kundenbestellung für eine größere Menge vorliegt und daher mehr Artikel bestellt werden müssen oder einer der Artikel nicht mehr im Sortiment ist. 
+Zudem lassen sich Artikel hinzufügen, die bisher nicht auf der Liste stehen, weil es sich z.B. um ein neues Produkt handelt oder der Artikel seit längerem ausverkauft war und deshalb nicht mit in die Berechnung einfließt.
+⚠️ **WICHTIG:** Klicke nach jedem fertig bearbeiteten Artikel auf **Speichern**.
+
+![Artikelbearbeitung](assets/anleitung_7.2.png)
+
+Klicke abschließend auf den Button "PDF Generieren". Die fertige Bestellung wird im selben Ordner abgelegt, in dem sich das Tool befindet. 
 
 ![Bestellvorschlag Beispiel](assets/bestellung.png)
 
