@@ -105,8 +105,9 @@ Wenn alle Optionen eingestellt sind, klicke auf **„Bestellvorschau öffnen“*
 
 ![Bestellvorschau](assets/anleitung_7.1.png)
 
-Per Klick auf einen der Artikel, kannst du diesen anpassen oder entfernen. Das ist vor allem dann hilfreich, wenn beispielsweise eine Kundenbestellung für eine größere Menge vorliegt und daher mehr Artikel bestellt werden müssen oder einer der Artikel nicht mehr im Sortiment ist. 
+Per Klick auf einen der Artikel, kannst du diesen anpassen oder entfernen. Das ist vor allem dann hilfreich, wenn beispielsweise eine Kundenbestellung für eine größere Menge vorliegt und daher mehr Artikel bestellt werden müssen oder einer der Artikel nicht mehr im Sortiment ist.  
 Zudem lassen sich Artikel hinzufügen, die bisher nicht auf der Liste stehen, weil es sich z.B. um ein neues Produkt handelt oder der Artikel seit längerem ausverkauft war und deshalb nicht mit in die Berechnung einfließt.
+
 ⚠️ **WICHTIG:** Klicke nach jedem fertig bearbeiteten Artikel auf **Speichern**.
 
 ![Artikelbearbeitung](assets/anleitung_7.2.png)
